@@ -1,9 +1,11 @@
 import sys
+
+
 if len(sys.argv) < 2:
     print("The file format should be main.py <filename>")
 
-with open(sys.argv[1],"rb") as file:
-    magic_string= file.read(16)
+with open(sys.argv[1], "rb") as file:
+    magic_string = file.read(16)
 
 
 
