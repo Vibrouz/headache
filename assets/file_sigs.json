@@ -2262,5 +2262,13 @@
         "Extension": "svg",
         "Description": "",
         "": ""
-    }
+    },
+    {
+    "Hex signature": "3C 21 44 4F 43 54 59 50 45 20 68 74 6d 6c 3e",
+    "ISO 8859-1": "<!DOCTYPE html>",
+    "Offset": "0",
+    "Extension": "html",
+    "Description": "Hypertext Markup Language (HTML5)",
+    "": ""
+}
 ]
