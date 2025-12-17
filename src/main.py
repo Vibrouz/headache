@@ -24,8 +24,8 @@ with open("../assets/file_sigs.json","r") as file_sig:
             extension = entity.get("Extension","Unknown")
             break;
 ext=sys.argv[1].split(".")[1]
-print(ext)
-print(extension)
+# print(ext)
+# print(extension)
 if ext == extension:
     print("The file extension and the extension written on the back of your file are similar ")
 else:
