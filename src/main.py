@@ -18,6 +18,8 @@ with open("../assets/file_sigs.json","r") as file_sig:
                     break
                 if ch.upper() in "1234567890ABCDEF":
                     hex_sign+=ch
+            if not hex_sign or len(hex_sign)!=2:
+                continue
         magic_bytes=bytes(int(hex_sign[i:i+2],16)%256 for i in range(0,len(hex_sign),2))
         offset= int(entity.get("Offset",0))
         if magic_string[offset:offset+len(magic_bytes)] == magic_bytes:
