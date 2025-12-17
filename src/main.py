@@ -14,11 +14,12 @@ with open("../assets/file_sigs.json","r") as file_sig:
         for sig_line in entity["Hex signature"].split("\n"):
             hex_sign=""
             for ch in sig_line:
-                if ch =="(": break
+                if ch =="(":
+                    break
                 if ch.upper() in "1234567890ABCDEF":
                     hex_sign+=ch
         magic_bytes=bytes(int(hex_sign[i:i+2],16)%256 for i in range(0,len(hex_sign),2))
-        offset= entity.get("offset",0)
+        offset= int(entity.get("Offset",0))
         if magic_string[offset:offset+len(magic_bytes)] == magic_bytes:
             print("ENtity Extension: ", entity.get("Extension","Unknown"))
             extension = entity.get("Extension","Unknown")
