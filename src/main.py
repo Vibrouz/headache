@@ -1,5 +1,6 @@
 import sys
 import json
+
 if len(sys.argv) < 2:
     print("The file format should be main.py <filename>")
 
@@ -26,6 +27,7 @@ with open("../assets/file_sigs.json","r") as file_sig:
             print("ENtity Extension: ", entity.get("Extension","Unknown"))
             extension = entity.get("Extension","Unknown")
             break;
+        
 ext=sys.argv[1].split(".")[1]
 # print(ext)
 # print(extension)
