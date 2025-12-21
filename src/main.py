@@ -1,34 +1,41 @@
+#!/usr/bin/env python3
+
 import sys
 import json
 
-if len(sys.argv) < 2:
+
+if len(sys.argv) == 1:
     print("The file format should be main.py <filename>")
+    exit(1)
 
-with open(sys.argv[1],"rb") as file:
+with open(sys.argv[1], "rb") as file:
     file.seek(0)
-    magic_string=file.read(32)
+    magic_string = file.read(32)
 
-with open("../assets/file_sigs.json","r") as file_sig:
+with open("../assets/file_sigs.json", "r") as file_sig:
     data=json.load(file_sig)
-    extension=""
+    extension = ""
+    hex_sign = ''
+    offset = 0
     for entity in data:
         for sig_line in entity["Hex signature"].split("\n"):
-            hex_sign=""
             for ch in sig_line:
-                if ch =="(":
+                if ch == "(":
                     break
                 if ch.upper() in "1234567890ABCDEF":
-                    hex_sign+=ch
-            if not hex_sign or len(hex_sign)!=2:
+                    hex_sign += ch
+            if not hex_sign or len(hex_sign) != 2:
                 continue
-        magic_bytes=bytes(int(hex_sign[i:i+2],16)%256 for i in range(0,len(hex_sign),2))
-        offset= int(entity.get("Offset",0))
-        if magic_string[offset:offset+len(magic_bytes)] == magic_bytes:
-            print("ENtity Extension: ", entity.get("Extension","Unknown"))
-            extension = entity.get("Extension","Unknown")
+        magic_bytes = bytes(int(hex_sign[i:i + 2], 16) % 256 for i in range(0, len(hex_sign), 2))
+        # offset = int(entity.get("Offset", 0))
+        offset = int(entity["Offset"].replace('\nany', ''))
+        # print(f"offset-type is {type(offset)}\nReality is {offset}\nActually, {type(entity['Offset'])}")
+        # exit(0)
+        if magic_string[offset:offset + len(magic_bytes)] == magic_bytes:
+            print("ENtity Extension: ", entity.get("Extension", "Unknown"))
+            extension = entity.get("Extension", "Unknown")
             break;
-        
-ext=sys.argv[1].split(".")[1]
+ext = sys.argv[1].split(".")[-1]
 # print(ext)
 # print(extension)
 if ext == extension:
