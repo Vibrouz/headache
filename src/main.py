@@ -2,44 +2,91 @@
 
 import sys
 import json
+import os
 
+def parse_hex_signature(hex_str):
+    clean = ""
+    for line in hex_str.strip().splitlines():
+       
+        if '(' in line:
+            line = line.split('(', 1)[0]
+       
+        clean += ''.join(ch for ch in line if ch.upper() in "0123456789ABCDEF")
+   
+    if len(clean) % 2 != 0:
+        clean = clean[:-1]  
+    return clean
 
-if len(sys.argv) == 1:
-    print("The file format should be main.py <filename>")
-    exit(1)
+def hex_to_bytes(hex_str):
+    if not hex_str:
+        return b""
+    try:
+        return bytes(int(hex_str[i:i+2], 16) for i in range(0, len(hex_str), 2))
+    except ValueError as e:
+        raise ValueError(f"Invalid hex string: {hex_str}") from e
 
-with open(sys.argv[1], "rb") as file:
-    file.seek(0)
-    magic_string = file.read(32)
+def parse_offset(offset_str):
+    if not offset_str or offset_str.strip().lower() in ('any', ''):
+        return 0
+    try:
+        return int(offset_str.strip())
+    except ValueError:
+        return 0  
 
-with open("../assets/file_sigs.json", "r") as file_sig:
-    data=json.load(file_sig)
-    extension = ""
-    hex_sign = ''
-    offset = 0
-    for entity in data:
-        for sig_line in entity["Hex signature"].split("\n"):
-            for ch in sig_line:
-                if ch == "(":
-                    break
-                if ch.upper() in "1234567890ABCDEF":
-                    hex_sign += ch
-            if not hex_sign or len(hex_sign) != 2:
-                continue
-        magic_bytes = bytes(int(hex_sign[i:i + 2], 16) % 256 for i in range(0, len(hex_sign), 2))
-        offset = int(entity.get("Offset", 0))
-       # offset = int(entity["Offset"].replace('\nany', ''))
-        # print(f"offset-type is {type(offset)}\nReality is {offset}\nActually, {type(entity['Offset'])}")
-        # exit(0)
-        if magic_string[offset:offset + len(magic_bytes)] == magic_bytes:
-            print("ENtity Extension: ", entity.get("Extension", "Unknown"))
-            extension = entity.get("Extension", "Unknown")
-            break;
-ext = sys.argv[1].split(".")[-1]
-# print(ext)
-# print(extension)
-if ext == extension:
-    print("The file extension and the extension written on the back of your file are similar ")
-else:
-    print("Mismatch in Extensions")
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: main.py <filename>", file=sys.stderr)
+        sys.exit(1)
 
+    filepath = sys.argv[1]
+    if not os.path.isfile(filepath):
+        print(f"Error: File '{filepath}' does not exist.", file=sys.stderr)
+        sys.exit(1)
+
+    
+    with open(filepath, "rb") as f:
+        file_start = f.read(32)  
+
+    sig_file = "../assets/file_sigs.json"
+    try:
+        with open(sig_file, "r") as sf:
+            signatures = json.load(sf)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading signatures: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    detected_ext = "Unknown"
+    for entry in signatures:
+        ext = entry.get("Extension", "Unknown")
+        hex_sig_raw = entry.get("Hex signature", "")
+        offset_str = entry.get("Offset", "0")
+
+       
+        offset = parse_offset(offset_str)
+
+        
+        hex_clean = parse_hex_signature(hex_sig_raw)
+        if not hex_clean:
+            continue
+
+        magic_bytes = hex_to_bytes(hex_clean)
+
+       
+        end = offset + len(magic_bytes)
+        if end > len(file_start):
+            continue  
+
+        if file_start[offset:end] == magic_bytes:
+            detected_ext = ext
+            break 
+
+    given_ext = os.path.splitext(filepath)[1].lstrip('.').lower()
+    detected_ext = detected_ext.lower()
+
+    if given_ext == detected_ext:
+        print("The file extension matches the actual file type.")
+    else:
+        print(f"Mismatch in extensions! File claims '.{given_ext}', but content suggests '.{detected_ext}'.")
+
+if __name__ == "__main__":
+    main()
