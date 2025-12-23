@@ -27,8 +27,8 @@ with open("../assets/file_sigs.json", "r") as file_sig:
             if not hex_sign or len(hex_sign) != 2:
                 continue
         magic_bytes = bytes(int(hex_sign[i:i + 2], 16) % 256 for i in range(0, len(hex_sign), 2))
-        # offset = int(entity.get("Offset", 0))
-        offset = int(entity["Offset"].replace('\nany', ''))
+        offset = int(entity.get("Offset", 0))
+       # offset = int(entity["Offset"].replace('\nany', ''))
         # print(f"offset-type is {type(offset)}\nReality is {offset}\nActually, {type(entity['Offset'])}")
         # exit(0)
         if magic_string[offset:offset + len(magic_bytes)] == magic_bytes:
