@@ -1,8 +1,8 @@
 import json
 import csv
 
-inputCsv = r"..\assets\file_sigs.csv"
-outputJson = r"..\assets\file_sigs.json"
+inputCsv = r"../assets/file_sigs.csv"
+outputJson = r"../assets/file_sigs.json"
 try:
     with open(inputCsv, encoding="utf-8") as csvFile:
         read = csv.DictReader(csvFile)
