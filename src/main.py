@@ -3,6 +3,7 @@
 import sys
 import json
 import os
+from time import sleep
 
 def parse_hex_signature(hex_str):
     clean = ""
@@ -56,21 +57,21 @@ def main():
         sys.exit(1)
 
     detected_ext = "Unknown"
+    identified_magic_bytes = b''
+    file_type = ''
     for entry in signatures:
+        file_type = entry.get("Description", "Unknown")
         ext = entry.get("Extension", "Unknown")
         hex_sig_raw = entry.get("Hex signature", "")
         offset_str = entry.get("Offset", "0")
 
-       
         offset = parse_offset(offset_str)
-
         
         hex_clean = parse_hex_signature(hex_sig_raw)
         if not hex_clean:
             continue
 
         magic_bytes = hex_to_bytes(hex_clean)
-
        
         end = offset + len(magic_bytes)
         if end > len(file_start):
@@ -78,15 +79,31 @@ def main():
 
         if file_start[offset:end] == magic_bytes:
             detected_ext = ext
+            identified_magic_bytes = magic_bytes
             break 
 
-    given_ext = os.path.splitext(filepath)[1].lstrip('.').lower()
+    file_ext = os.path.splitext(filepath)[1].lstrip('.').lower()
+    file_name = os.path.basename(filepath)
     detected_ext = detected_ext.lower()
 
-    if given_ext == detected_ext:
-        print("The file extension matches the actual file type.")
+    print(f"""
+File Type Analysis
+    Name: {file_name}
+    Extension: {file_ext}
+    Type: {file_type}
+    Identified Header Hex: {identified_magic_bytes.hex()}
+    """)
+
+    print("\nChecking if file matches what it claims to be...\n")
+    sleep(1)
+
+    if file_ext == detected_ext:
+        print("Legit file! The file extension matches the actual file type.")
     else:
-        print(f"Mismatch in extensions! File claims '.{given_ext}', but content suggests '.{detected_ext}'.")
+        if detected_ext != "unknown":
+            print(f"Mismatch in extensions! File claims '.{file_ext}', but content suggests '.{detected_ext}'.")
+        else:
+            print("Unknown Extension!")
 
 if __name__ == "__main__":
     main()
