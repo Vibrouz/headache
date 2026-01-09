@@ -9,8 +9,9 @@ try:
         data = []
         for row in read:
             clean_row = {k:v for k,v in row.items() if k}
+            clean_row["Extension"] = clean_row["Extension"].split()
             data.append(clean_row)
-    
+
     with open(outputJson, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
 except FileNotFoundError:

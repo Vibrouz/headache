@@ -56,12 +56,13 @@ def main():
         print(f"Error loading signatures: {e}", file=sys.stderr)
         sys.exit(1)
 
-    detected_ext = "Unknown"
+    detected_ext = [] 
     identified_magic_bytes = b''
     file_type = ''
+    is_legit_file = False  # has file type - can it be identified?
     for entry in signatures:
         file_type = entry.get("Description", "Unknown")
-        ext = entry.get("Extension", "Unknown")
+        ext = entry.get("Extension", "unknown")
         hex_sig_raw = entry.get("Hex signature", "")
         offset_str = entry.get("Offset", "0")
 
@@ -80,11 +81,11 @@ def main():
         if file_start[offset:end] == magic_bytes:
             detected_ext = ext
             identified_magic_bytes = magic_bytes
+            is_legit_file = True
             break 
 
     file_ext = os.path.splitext(filepath)[1].lstrip('.').lower()
     file_name = os.path.basename(filepath)
-    detected_ext = detected_ext.lower()
 
     print(f"""
 File Type Analysis
@@ -97,13 +98,13 @@ File Type Analysis
     print("\nChecking if file matches what it claims to be...\n")
     sleep(1)
 
-    if file_ext == detected_ext:
+    if file_ext in detected_ext:
         print("Legit file! The file extension matches the actual file type.")
     else:
-        if detected_ext != "unknown":
-            print(f"Mismatch in extensions! File claims '.{file_ext}', but content suggests '.{detected_ext}'.")
+        if "unknown" not in detected_ext and is_legit_file:
+            print(f"Mismatch in extensions! File claims '.{file_ext}', but content suggests one of these: '.{' .'.join(detected_ext)}'")
         else:
-            print("Unknown Extension!")
+            print("Unknown File Type! Maybe ASCII text or a raw data?!")
 
 if __name__ == "__main__":
     main()
