@@ -4,6 +4,18 @@ import sys
 import json
 import os
 from time import sleep
+import argparse
+
+
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+
 
 def parse_hex_signature(hex_str):
     clean = ""
@@ -34,16 +46,30 @@ def parse_offset(offset_str):
     except ValueError:
         return 0  
 
+def check_file(file_ext: str, analyzed_ext: list, is_typical_file: bool) -> None:
+    print(f"\n{Colors.BLUE}󰙎 Checking if file matches what it claims to be...{Colors.ENDC}\n")
+    sleep(1)
+
+    if file_ext in analyzed_ext:
+        print(f"{Colors.GREEN}✓ Legit file! The file extension matches the actual file type.{Colors.GREEN}")
+    else:
+        if "unknown" not in analyzed_ext and is_typical_file:
+            print(f"{Colors.RED}! Mismatch in extensions! File claims '.{file_ext}', but content suggests one of these: '.{' .'.join(analyzed_ext)}'{Colors.ENDC}")
+        else:
+            print(f"{Colors.YELLOW}⚠ Unknown File Type! Maybe ASCII text or a raw data?!{Colors.ENDC}")
+    
+
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: main.py <filename>", file=sys.stderr)
-        sys.exit(1)
+    parse = argparse.ArgumentParser(description="Scan file types by looking at their header bytes, known as magic bytes")
+    
+    parse.add_argument("file", help="a file to be scanned/processed")
+    parse.add_argument("-c", "--check", action="store_true", help="check wheather the file is legit or not")
+    args = parse.parse_args()
 
-    filepath = sys.argv[1]
+    filepath = args.file
     if not os.path.isfile(filepath):
-        print(f"Error: File '{filepath}' does not exist.", file=sys.stderr)
+        print(f"{Colors.RED}Error: File '{filepath}' does not exist.{Colors.ENDC}", file=sys.stderr)
         sys.exit(1)
-
     
     with open(filepath, "rb") as f:
         file_start = f.read(32)  
@@ -88,23 +114,15 @@ def main():
     file_name = os.path.basename(filepath)
 
     print(f"""
-File Type Analysis
-    Name: {file_name}
-    Extension: {file_ext}
-    Type: {file_type}
-    Identified Header Hex: {identified_magic_bytes.hex()}
+{Colors.HEADER}File Type Analysis{Colors.ENDC}
+{Colors.BLUE} Name: {file_name}
+{Colors.BLUE} Extension: {file_ext or "none"}
+{Colors.BLUE} Type: {file_type}
+{Colors.BLUE} Identified Header Hex: {identified_magic_bytes.hex()}{Colors.ENDC}
     """)
 
-    print("\nChecking if file matches what it claims to be...\n")
-    sleep(1)
-
-    if file_ext in detected_ext:
-        print("Legit file! The file extension matches the actual file type.")
-    else:
-        if "unknown" not in detected_ext and is_legit_file:
-            print(f"Mismatch in extensions! File claims '.{file_ext}', but content suggests one of these: '.{' .'.join(detected_ext)}'")
-        else:
-            print("Unknown File Type! Maybe ASCII text or a raw data?!")
+    if args.check:
+        check_file(file_ext, detected_ext, is_legit_file)
 
 if __name__ == "__main__":
     main()

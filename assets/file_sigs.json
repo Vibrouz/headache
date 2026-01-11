@@ -902,7 +902,8 @@
     "Extension": [
       "ogg",
       "oga",
-      "ogv"
+      "ogv",
+      "dat"
     ],
     "Description": "Ogg, an open source media container format"
   },
