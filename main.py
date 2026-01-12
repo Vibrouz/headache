@@ -74,7 +74,7 @@ def main():
     with open(filepath, "rb") as f:
         file_start = f.read(32)  
 
-    sig_file = "../assets/file_sigs.json"
+    sig_file = "assets/file_sigs.json"
     try:
         with open(sig_file, "r") as sf:
             signatures = json.load(sf)
