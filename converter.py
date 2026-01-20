@@ -1,8 +1,8 @@
 import json
 import csv
 
-inputCsv = r"../assets/file_sigs.csv"
-outputJson = r"../assets/file_sigs.json"
+inputCsv = r"assets/file_sigs.csv"
+outputJson = r"assets/file_sigs.json"
 try:
     with open(inputCsv, encoding="utf-8") as csvFile:
         read = csv.DictReader(csvFile)
@@ -15,4 +15,4 @@ try:
     with open(outputJson, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
 except FileNotFoundError:
-    print("The file you gave is not found")
+    print("File couldn't be found!")
